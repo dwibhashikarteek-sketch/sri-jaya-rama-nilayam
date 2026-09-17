@@ -261,6 +261,9 @@ th,td{padding:8px;border-bottom:1px solid #203129;text-align:left}th{color:var(-
   <input id="visitorPurpose" maxlength="160" placeholder="Purpose of Visit">
   <button class="btn gold" type="button" onclick="submitVisitorRequest()">REQUEST ENTRY / طلب الدخول</button>
   <div id="visitorStatus" class="access-status pending" style="margin-top:12px">Complete the form and request entry.</div>
+  <div id="visitorSessionPanel" style="display:none;margin-top:12px">
+    <button id="visitorCheckoutBtn" class="btn" type="button" onclick="visitorCheckout()" style="display:none">CHECK OUT / تسجيل المغادرة</button>
+  </div>
   <div class="privacy-note"><strong>Privacy:</strong> This creates an authorization request only. It does not unlock a door or reveal household occupancy, sensor status or private controls.</div>
 </section>
 
@@ -821,13 +824,55 @@ function visitorStatus(t,c="pending"){
   const e=document.getElementById("visitorStatus");
   if(e){e.textContent=t;e.className="access-status "+c;}
 }
+
+function setVisitorFormLocked(locked){
+  ["visitorName","visitorMobile4","visitorType","visitorPurpose"].forEach(id=>{
+    const e=document.getElementById(id);
+    if(e)e.disabled=!!locked;
+  });
+  const requestBtn=document.querySelector('#visitor-access button[onclick="submitVisitorRequest()"]');
+  if(requestBtn) requestBtn.style.display=locked?"none":"inline-flex";
+}
+
+function setVisitorCheckoutVisible(show){
+  const panel=document.getElementById("visitorSessionPanel");
+  const btn=document.getElementById("visitorCheckoutBtn");
+  if(panel)panel.style.display=show?"block":"none";
+  if(btn)btn.style.display=show?"inline-flex":"none";
+}
+
+function saveVisitorDisplay(data){
+  localStorage.setItem("sjrn_visitor_display",JSON.stringify(data));
+}
+
+function restoreVisitorDisplay(){
+  try{
+    const d=JSON.parse(localStorage.getItem("sjrn_visitor_display")||"null");
+    if(!d)return;
+    if(document.getElementById("visitorName"))document.getElementById("visitorName").value=d.name||"";
+    if(document.getElementById("visitorMobile4"))document.getElementById("visitorMobile4").value=d.mobile4||"";
+    if(document.getElementById("visitorType"))document.getElementById("visitorType").value=d.type||"Guest / Visitor";
+    if(document.getElementById("visitorPurpose"))document.getElementById("visitorPurpose").value=d.purpose||"";
+  }catch(e){}
+}
+
+function clearVisitorSession(){
+  localStorage.removeItem("sjrn_visitor_last");
+  localStorage.removeItem("sjrn_visitor_token");
+  localStorage.removeItem("sjrn_visitor_display");
+  setVisitorFormLocked(false);
+  setVisitorCheckoutVisible(false);
+}
+
 async function submitVisitorRequest(){
   const name=(document.getElementById("visitorName")?.value||"").trim();
   const mobile4=(document.getElementById("visitorMobile4")?.value||"").replace(/\D/g,"").slice(0,4);
   const type=document.getElementById("visitorType")?.value||"Guest / Visitor";
   const purpose=(document.getElementById("visitorPurpose")?.value||"").trim();
+
   if(name.length<2){visitorStatus("Please enter the visitor name.","declined");return;}
   if(!/^\d{4}$/.test(mobile4)){visitorStatus("Please enter exactly the last 4 digits of the mobile number.","declined");return;}
+
   try{
     visitorStatus("Submitting request…","pending");
     const data=await apiPost({
@@ -837,27 +882,110 @@ async function submitVisitorRequest(){
       visitor_type:type,
       purpose:purpose
     });
+
     localStorage.setItem("sjrn_visitor_last",data.id);
+    localStorage.setItem("sjrn_visitor_token",data.visitor_token);
+    saveVisitorDisplay({name,mobile4,type,purpose});
+    setVisitorFormLocked(true);
+    setVisitorCheckoutVisible(false);
     visitorStatus("ENTRY REQUEST SUBMITTED • PENDING OWNER AUTHORIZATION","pending");
-    refreshVisitorStatus();
-  }catch(e){visitorStatus("Request could not be submitted: "+e.message,"declined");}
+    await refreshVisitorStatus();
+  }catch(e){
+    visitorStatus("Request could not be submitted: "+e.message,"declined");
+  }
 }
+
 async function refreshVisitorStatus(){
   const id=localStorage.getItem("sjrn_visitor_last");
-  if(!id || !SJRN_APPS_SCRIPT_URL)return;
+  const token=localStorage.getItem("sjrn_visitor_token");
+  if(!id || !token || !SJRN_APPS_SCRIPT_URL)return;
+
+  restoreVisitorDisplay();
+  setVisitorFormLocked(true);
+
   try{
-    const r=await fetch(SJRN_APPS_SCRIPT_URL+"?action=event&id="+encodeURIComponent(id)+"&_="+Date.now(),{cache:"no-store"});
-    const d=await r.json();
-    if(d.ok&&d.event){
-      const s=d.event.status;
-      visitorStatus("ENTRY REQUEST • "+statusText(s),s==="approved"?"approved":s==="declined"?"declined":"pending");
+    const d=await apiPost({
+      action:"visitor_status",
+      id:id,
+      visitor_token:token
+    });
+
+    if(d.ok && d.event){
+      const s=String(d.event.status||"pending");
+      const owner=d.event.owner_label||"Residence Owner";
+
+      if(s==="approved"){
+        visitorStatus("✓ ENTRY AUTHORIZED • Authorized by "+owner+" • Welcome to Sri Jaya Rama Nilayam","approved");
+        setVisitorCheckoutVisible(true);
+      }else if(s==="declined"){
+        visitorStatus("✕ ENTRY REQUEST DECLINED","declined");
+        setVisitorCheckoutVisible(false);
+      }else{
+        visitorStatus("⏳ ENTRY REQUEST • PENDING OWNER AUTHORIZATION","pending");
+        setVisitorCheckoutVisible(false);
+      }
     }
-  }catch(e){}
+  }catch(e){
+    if(/expired|invalid/i.test(String(e.message||""))){
+      clearVisitorSession();
+      visitorStatus("Visitor session expired. Please submit a new entry request.","declined");
+    }
+  }
 }
-if(new URLSearchParams(location.search).get("visitor")==="1"){
-  setTimeout(()=>document.getElementById("visitor-access")?.scrollIntoView({behavior:"smooth"}),400);
+
+async function visitorCheckout(){
+  const id=localStorage.getItem("sjrn_visitor_last");
+  const token=localStorage.getItem("sjrn_visitor_token");
+  if(!id || !token){
+    visitorStatus("No active visitor session found.","declined");
+    return;
+  }
+
+  const btn=document.getElementById("visitorCheckoutBtn");
+  if(btn)btn.disabled=true;
+
+  try{
+    visitorStatus("Recording check-out…","pending");
+    await apiPost({
+      action:"visitor_checkout",
+      id:id,
+      visitor_token:token
+    });
+
+    clearVisitorSession();
+    visitorStatus("✓ CHECKED OUT • Thank you for visiting Sri Jaya Rama Nilayam.","approved");
+
+    ["visitorName","visitorMobile4","visitorPurpose"].forEach(x=>{
+      const e=document.getElementById(x); if(e)e.value="";
+    });
+    const t=document.getElementById("visitorType");
+    if(t)t.value="Family / Friend";
+  }catch(e){
+    visitorStatus("Check-out could not be completed: "+e.message,"declined");
+    if(btn)btn.disabled=false;
+  }
 }
+
+function initVisitorAccess(){
+  restoreVisitorDisplay();
+  const id=localStorage.getItem("sjrn_visitor_last");
+  const token=localStorage.getItem("sjrn_visitor_token");
+  if(id && token){
+    setVisitorFormLocked(true);
+    visitorStatus("Checking current authorization status…","pending");
+    refreshVisitorStatus();
+  }else{
+    setVisitorFormLocked(false);
+    setVisitorCheckoutVisible(false);
+  }
+
+  if(new URLSearchParams(location.search).get("visitor")==="1"){
+    setTimeout(()=>document.getElementById("visitor-access")?.scrollIntoView({behavior:"smooth"}),400);
+  }
+}
+
 setInterval(refreshVisitorStatus,15000);
+setTimeout(initVisitorAccess,100);
 
 if(new URLSearchParams(location.search).get("family")==="wife"){
   setTimeout(()=>document.getElementById("family-wife")?.scrollIntoView({behavior:"smooth"}),400);
