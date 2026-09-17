@@ -157,6 +157,7 @@ th,td{padding:8px;border-bottom:1px solid #203129;text-align:left}th{color:var(-
   <a class="btn gold" href="#visit">📍 Visiting Card<br><span style="font-weight:400">بطاقة الزيارة</span></a>
   <a class="btn" href="https://wa.me/919505382339?text=Hello%2C%20I%20am%20contacting%20you%20regarding%20Sri%20Jaya%20Rama%20Nilayam." target="_blank">💬 WhatsApp<br><span style="font-weight:400">واتساب</span></a>
   <a class="btn" href="https://wa.me/919505382339?text=Hello%2C%20I%20have%20arrived%20at%20Sri%20Jaya%20Rama%20Nilayam." target="_blank">🔔 I Have Arrived<br><span style="font-weight:400">لقد وصلت</span></a>
+  <a class="btn gold" href="#visitor-access">🎫 Visitor Access<br><span style="font-weight:400">دخول الزوار</span></a>
   <a class="btn" href="#resident">🔐 Resident Access<br><span style="font-weight:400">دخول المقيمين</span></a>
 </div>
 
@@ -232,6 +233,37 @@ th,td{padding:8px;border-bottom:1px solid #203129;text-align:left}th{color:var(-
   </div>
 </section>
 
+
+<section id="visitor-access" class="panel" style="margin-top:28px">
+  <div class="section-head" style="margin-top:0">
+    <small>SMART VISITOR ACCESS</small>
+    <h2>Guest & Visitor Entry Request</h2>
+    <div class="ar">طلب دخول الضيوف والزوار</div>
+    <p>Request entry to Sri Jaya Rama Nilayam. Every request remains pending until authorized by the Residence Owner.</p>
+  </div>
+  <div class="registered-family">
+    <div class="label">PUBLIC VISITOR PORTAL</div>
+    <div class="name">Sri Jaya Rama Nilayam</div>
+    <div class="meta">No family, security, Digital Twin or owner information is exposed through this portal.</div>
+  </div>
+  <div class="grid2">
+    <input id="visitorName" autocomplete="name" placeholder="Visitor Name">
+    <input id="visitorMobile4" inputmode="numeric" maxlength="4" placeholder="Mobile – Last 4 Digits">
+  </div>
+  <select id="visitorType" class="family-choice">
+    <option>Family / Friend</option>
+    <option>Guest / Visitor</option>
+    <option>Domestic Help</option>
+    <option>Delivery</option>
+    <option>Technician / Service</option>
+    <option>Other</option>
+  </select>
+  <input id="visitorPurpose" maxlength="160" placeholder="Purpose of Visit">
+  <button class="btn gold" type="button" onclick="submitVisitorRequest()">REQUEST ENTRY / طلب الدخول</button>
+  <div id="visitorStatus" class="access-status pending" style="margin-top:12px">Complete the form and request entry.</div>
+  <div class="privacy-note"><strong>Privacy:</strong> This creates an authorization request only. It does not unlock a door or reveal household occupancy, sensor status or private controls.</div>
+</section>
+
 <section id="resident" class="lockwrap">
   <div class="lock" id="lockBox">
     <div style="font-size:34px">🔐</div>
@@ -266,7 +298,7 @@ th,td{padding:8px;border-bottom:1px solid #203129;text-align:left}th{color:var(-
     <div class="status-pill">ENERGY<b>TRACK</b></div>
     <div class="status-pill">SOLAR<b>LUMINOUS</b></div>
     <div class="status-pill">ALEXA<b>2 FLOORS</b></div>
-    <div class="status-pill">TAPO<b>INSTALLED</b></div>
+    <div class="status-pill">TAPO<b>INSTALLING</b></div>
     <div class="status-pill">AI CORE<b>V2</b></div>
   </div>
 
@@ -346,14 +378,14 @@ th,td{padding:8px;border-bottom:1px solid #203129;text-align:left}th{color:var(-
   <div class="section-head"><small>OWNER AUTHORIZATION</small><h2>Dr. Karteek • Primary Administrator</h2><div class="ar">تفويض المالك • المسؤول الرئيسي</div></div>
   <div class="owner-gate" id="ownerGate">
     <span class="badge owner">OWNER ONLY</span><h3>Owner Command Centre</h3><div class="ar">مركز قيادة المالك</div>
-    <p class="small">Owner authorization is verified by the private Apps Script backend using a short PIN and time-limited secure session. Sensitive controls such as door unlock, cameras and Wi-Fi credentials remain outside this public interface.</p>
+    <p class="small">This static GitHub version provides a local prototype authorization layer only. Do not connect door-unlock, cameras, Wi-Fi passwords or other sensitive controls until proper authenticated private infrastructure is added.</p>
     <div class="owner-login"><input id="ownerPin" type="password" inputmode="numeric" placeholder="Owner PIN / الرقم السري للمالك"><button class="btn gold" onclick="ownerAuthorize()">Authorize / تفويض</button></div>
     <div style="margin-top:8px"><span class="small">Owner PIN is verified securely by the private Apps Script backend. No long owner token is required.</span></div>
     <div id="ownerMsg" class="small" style="margin-top:8px"></div>
   </div>
 
   <div id="ownerArea" class="owner-area">
-    <div class="owner-head"><div><h2>Owner Executive View</h2><div class="ar">لوحة المالك التنفيذية</div><section class="panel" style="margin-top:14px"><h3>Owner Authorization Queue</h3><div class="ar">قائمة تفويض المالك</div><div class="grid2" style="margin-bottom:10px"><button class="btn" type="button" onclick="renderOwnerApprovals()">↻ Refresh Pending Requests</button><button class="btn" type="button" onclick="lockOwnerSession()">🔒 Lock Owner Session</button></div><div id="ownerApprovalQueue" class="small">No family access requests recorded.</div></section></div><button class="btn" onclick="ownerLock()">🔒 Lock Owner Mode</button></div>
+    <div class="owner-head"><div><h2>Owner Executive View</h2><div class="ar">لوحة المالك التنفيذية</div><section class="panel" style="margin-top:14px"><h3>Owner Authorization Queue</h3><div class="ar">قائمة تفويض المالك</div><div class="grid2" style="margin-bottom:10px"><button class="btn" type="button" onclick="renderOwnerApprovals()">↻ Refresh Pending Requests</button><button class="btn" type="button" onclick="lockOwnerSession()">🔒 Lock Owner Session</button></div>\n<div id="ownerApprovalQueue" class="small">No family access requests recorded.</div></section></div><button class="btn" onclick="ownerLock()">🔒 Lock Owner Mode</button></div>
 
     <div class="owner-grid">
       <div class="owner-tile attn">⚠️<b>What Needs My Attention?</b><small>Tapo Hub, door sensors and temperature/humidity sensors are installed. Live readings will activate after the private integration layer is connected.</small></div>
@@ -368,8 +400,8 @@ th,td{padding:8px;border-bottom:1px solid #203129;text-align:left}th{color:var(-
 
     <div class="section-head"><small>AI DIGITAL TWIN</small><h2>Ground Floor • First Floor</h2><div class="ar">التوأم الرقمي للمنزل</div></div>
     <div class="digital-twin">
-      <div class="floor"><h4>Ground Floor</h4><div class="roomchips"><span class="roomchip">🔊 Alexa <em>READY</em></span><span class="roomchip">📶 Wi-Fi <em>TRACK</em></span><span class="roomchip">🛡️ Security <em>PLANNED</em></span><span class="roomchip">⚡ Energy <em>PLANNED</em></span><span class="roomchip">🌡️ Tapo Temperature/Humidity <em>INSTALLED</em></span></div></div>
-      <div class="floor"><h4>First Floor</h4><div class="roomchips"><span class="roomchip">🔊 Alexa <em>READY</em></span><span class="roomchip">📶 Wi-Fi / Mesh <em>TRACK</em></span><span class="roomchip">🚪 Tapo Door Sensors <em>INSTALLED</em></span><span class="roomchip">⚡ Smart Plugs <em>FUTURE</em></span><span class="roomchip">🌡️ Tapo Temperature/Humidity <em>INSTALLED</em></span></div></div>
+      <div class="floor"><h4>Ground Floor</h4><div class="roomchips"><span class="roomchip">🔊 Alexa <em>READY</em></span><span class="roomchip">📶 Wi-Fi <em>TRACK</em></span><span class="roomchip">🛡️ Security <em>PLANNED</em></span><span class="roomchip">⚡ Energy <em>PLANNED</em></span><span class="roomchip">🌡️ Tapo Temperature/Humidity <em>ACTIVE</em></span></div></div>
+      <div class="floor"><h4>First Floor</h4><div class="roomchips"><span class="roomchip">🔊 Alexa <em>READY</em></span><span class="roomchip">📶 Wi-Fi / Mesh <em>TRACK</em></span><span class="roomchip">🚪 Tapo Door Sensors <em>ACTIVE</em></span><span class="roomchip">⚡ Smart Plugs <em>FUTURE</em></span><span class="roomchip">🌡️ Tapo Temperature/Humidity <em>ACTIVE</em></span></div></div>
     </div>
 
     <div class="section-head"><small>AI RESIDENCE MASTER ROADMAP</small><h2>Complete Intelligence Architecture</h2><div class="ar">خارطة طريق المنزل الذكي المتكاملة</div><p>All major capabilities discussed are represented below. “Now” indicates functions already present in this HTML; “Next” indicates practical near-term upgrades; “Future” requires additional hardware, private integrations or stronger authentication.</p></div>
@@ -392,9 +424,9 @@ th,td{padding:8px;border-bottom:1px solid #203129;text-align:left}th{color:var(-
 <div class="grid2"><button class="btn green" onclick="wifeMovement('IN')">✓ CHECK IN</button><button class="btn red" onclick="wifeMovement('OUT')">↗ CHECK OUT</button></div>
 <div id="wifeStatus" class="access-status pending">No request submitted on this device.</div>
 </div></div>
-<div class="backend-note"><b>Google Sheets storage • LIVE:</b> Family Check-In / Check-Out requests are stored through the connected Google Apps Script backend and shared with the Owner Authorization Queue. Occupancy changes only after owner approval.</div>
+<div class="backend-note"><b>Google Sheets storage:</b> This interface is prepared for Google Sheets through Google Apps Script. Once the supplied Web App is deployed and its URL is added to this HTML, her phone and your Owner dashboard will share the same persistent authorization log.</div>
 </section>
-Owner Authorization</b><span>Separate administrator layer for Dr. Karteek.</span><div class="mini-ar">تفويض المالك</div><i class="phase now">NOW • SECURE BACKEND</i></div>
+Owner Authorization</b><span>Separate administrator layer for Dr. Karteek.</span><div class="mini-ar">تفويض المالك</div><i class="phase now">NOW • LOCAL PROTOTYPE</i></div>
         <div class="module"><b>Smart Guest Journey</b><span>QR → directions → arrival → check-in → checkout.</span><i class="phase next">NEXT</i></div>
         <div class="module"><b>Expected Visitor List</b><span>Separate expected and unexpected arrivals.</span><i class="phase next">NEXT</i></div>
         <div class="module"><b>Guest & Technician Passes</b><span>Temporary, expiring permissions.</span><i class="phase future">FUTURE</i></div>
@@ -675,7 +707,7 @@ function roadTab(name,btn){
 
 <script>
 /*
-  SRI JAYA RAMA NILAYAM — GOOGLE SHEETS BACKEND • V4.6 PRODUCTION • SECURE SHORT-PIN OWNER SESSION
+  SRI JAYA RAMA NILAYAM — GOOGLE SHEETS BACKEND • V4.5 SECURE SHORT-PIN OWNER SESSION
   After deploying the supplied Google Apps Script as a Web App,
   paste its /exec URL below.
 */
@@ -783,6 +815,50 @@ async function authorizeFamily(id,s){
     alert("Authorization could not be stored: "+e.message);
   }
 }
+
+
+function visitorStatus(t,c="pending"){
+  const e=document.getElementById("visitorStatus");
+  if(e){e.textContent=t;e.className="access-status "+c;}
+}
+async function submitVisitorRequest(){
+  const name=(document.getElementById("visitorName")?.value||"").trim();
+  const mobile4=(document.getElementById("visitorMobile4")?.value||"").replace(/\D/g,"").slice(0,4);
+  const type=document.getElementById("visitorType")?.value||"Guest / Visitor";
+  const purpose=(document.getElementById("visitorPurpose")?.value||"").trim();
+  if(name.length<2){visitorStatus("Please enter the visitor name.","declined");return;}
+  if(!/^\d{4}$/.test(mobile4)){visitorStatus("Please enter exactly the last 4 digits of the mobile number.","declined");return;}
+  try{
+    visitorStatus("Submitting request…","pending");
+    const data=await apiPost({
+      action:"family_event",
+      person_code:"visitor_"+Date.now().toString(36)+"_"+mobile4,
+      person_label:name,
+      movement:"IN",
+      person_type:type,
+      note:(purpose?purpose+" • ":"")+"Mobile ending "+mobile4
+    });
+    localStorage.setItem("sjrn_visitor_last",data.id);
+    visitorStatus("ENTRY REQUEST SUBMITTED • PENDING OWNER AUTHORIZATION","pending");
+    refreshVisitorStatus();
+  }catch(e){visitorStatus("Request could not be submitted: "+e.message,"declined");}
+}
+async function refreshVisitorStatus(){
+  const id=localStorage.getItem("sjrn_visitor_last");
+  if(!id || !SJRN_APPS_SCRIPT_URL)return;
+  try{
+    const r=await fetch(SJRN_APPS_SCRIPT_URL+"?action=event&id="+encodeURIComponent(id)+"&_="+Date.now(),{cache:"no-store"});
+    const d=await r.json();
+    if(d.ok&&d.event){
+      const s=d.event.status;
+      visitorStatus("ENTRY REQUEST • "+statusText(s),s==="approved"?"approved":s==="declined"?"declined":"pending");
+    }
+  }catch(e){}
+}
+if(new URLSearchParams(location.search).get("visitor")==="1"){
+  setTimeout(()=>document.getElementById("visitor-access")?.scrollIntoView({behavior:"smooth"}),400);
+}
+setInterval(refreshVisitorStatus,15000);
 
 if(new URLSearchParams(location.search).get("family")==="wife"){
   setTimeout(()=>document.getElementById("family-wife")?.scrollIntoView({behavior:"smooth"}),400);
