@@ -831,12 +831,11 @@ async function submitVisitorRequest(){
   try{
     visitorStatus("Submitting request…","pending");
     const data=await apiPost({
-      action:"family_event",
-      person_code:"visitor_"+Date.now().toString(36)+"_"+mobile4,
+      action:"visitor_request",
       person_label:name,
-      movement:"IN",
-      person_type:type,
-      note:(purpose?purpose+" • ":"")+"Mobile ending "+mobile4
+      mobile_last4:mobile4,
+      visitor_type:type,
+      purpose:purpose
     });
     localStorage.setItem("sjrn_visitor_last",data.id);
     visitorStatus("ENTRY REQUEST SUBMITTED • PENDING OWNER AUTHORIZATION","pending");
